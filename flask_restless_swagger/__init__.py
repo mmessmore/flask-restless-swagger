@@ -2,11 +2,12 @@ __author__ = 'Michael Messmore'
 __email__ = 'mike@messmore.org'
 __version__ = '0.1.0'
 
-
+import urlparse
+import json
+import yaml
+from flask import jsonify, request, Blueprint, redirect
 from flask_restless import APIManager
 from flask_restless.helpers import *
-import yaml
-import json
 
 postgres_swagger = {
     'INTEGER': 'integer',
@@ -22,7 +23,7 @@ class SwagAPIManager(object):
     swagger = {
         'swagger': '2.0',
         'info': {},
-        'schemes': ['https'],
+        'schemes': ['http', 'https'],
         'basePath': '/',
         'consumes': ['application/json'],
         'produces': ['application/json'],
@@ -30,34 +31,18 @@ class SwagAPIManager(object):
         'definitions': {}
     }
 
-    def __init__(self, app=None):
+    def __init__(self, app=None, **kwargs):
         self.app = None
         self.manager = None
 
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, **kwargs)
 
     def to_json(self, **kwargs):
         return json.dumps(self.swagger, **kwargs)
 
     def to_yaml(self, **kwargs):
         return yaml.dump(self.swagger, **kwargs)
-
-    # Try to be as much of a dict as possible
-    def __getitem__(self, item):
-        return self.swagger[item]
-
-    def __setitem__(self, key, value):
-        self.swagger[key] = value
-
-    def __delitem__(self, key):
-        del (self.swagger[key])
-
-    def __contains__(self, item):
-        return item in self.swagger
-
-    def __len__(self):
-        return len(self.swagger)
 
     def __str__(self):
         return self.to_json(indent=4)
@@ -95,7 +80,8 @@ class SwagAPIManager(object):
     def add_path(self, model, **kwargs):
         name = model.__tablename__
         schema = model.__name__
-        path = kwargs.get('url_prefix', ""), '/' + name
+        path = kwargs.get('url_prefix', "") + '/' + name
+        id_path = "{0}/{{{1}Id}}".format(path, schema.lower())
         self.swagger['paths'][path] = {}
 
         for method in [m.lower() for m in kwargs.get('methods', ['GET'])]:
@@ -119,7 +105,9 @@ class SwagAPIManager(object):
 
                     }
                 }
-                self.swagger['paths']["{}/{{{}Id}}".format(path, schema.lower())][method] = {
+                if id_path not in self.swagger['paths']:
+                    self.swagger['paths'][id_path] = {}
+                self.swagger['paths'][id_path][method] = {
                     'parameters': [{
                         'name': schema.lower() + 'Id',
                         'in': 'path',
@@ -139,7 +127,9 @@ class SwagAPIManager(object):
                     }
                 }
             elif method == 'delete':
-                self.swagger['paths']["{}/{{{}Id}}".format(path, schema.lower())][method] = {
+                if id_path not in self.swagger['paths']:
+                    self.swagger['paths'][id_path] = {}
+                self.swagger['paths']["{0}/{{{1}Id}}".format(path, schema.lower())][method] = {
                     'parameters': [{
                         'name': schema.lower() + 'Id',
                         'in': 'path',
@@ -178,10 +168,13 @@ class SwagAPIManager(object):
         }
         columns = get_columns(model).keys()
         for column_name, column in get_columns(model).iteritems():
-            if column_name in kwargs.get('exclude_columns'):
+            if column_name in kwargs.get('exclude_columns', []):
                 continue
             try:
-                column_defn = postgres_swagger[column.type]
+                column_type = str(column.type)
+                if '(' in column_type:
+                    column_type = column_type.split('(')[0]
+                column_defn = postgres_swagger[column_type]
             except AttributeError:
                 schema = get_related_model(model, column_name)
                 if column_name + '_id' in columns:
@@ -197,12 +190,30 @@ class SwagAPIManager(object):
                     }}
             self.swagger['definitions'][name]['properties'][column_name] = column_defn
 
-    def init_app(self, app):
+    def init_app(self, app, **kwargs):
         self.app = app
+        self.manager = APIManager(self.app, **kwargs)
 
-    def init_manager(self, db):
-        self.manager = APIManager(self.app, flask_sqlalchemy_db=db)
+        swagger = Blueprint('swagger', __name__, static_folder='static',
+                            static_url_path=self.app.static_url_path + '/swagger', )
+
+        @swagger.route('/swagger')
+        def swagger_ui():
+            return redirect('/static/swagger/swagger-ui/index.html')
+
+        @swagger.route('/swagger.json')
+        def swagger_json():
+            # I can only get this from a request context
+            self.swagger['host'] = urlparse.urlparse(request.url_root).netloc
+            return jsonify(self.swagger)
+
+        app.register_blueprint(swagger)
 
     def create_api(self, model, **kwargs):
-
         self.manager.create_api(model, **kwargs)
+        self.add_defn(model, **kwargs)
+        self.add_path(model, **kwargs)
+
+    def swagger_blueprint(self):
+
+        return swagger

@@ -30,11 +30,13 @@ setup(
     author_email='mike@messmore.org',
     url='https://github.com/mmessmore/flask-restless-swagger',
     packages=[
-        'flask-restless-swagger',
+        'flask_restless_swagger',
     ],
-    package_dir={'flask-restless-swagger': 'flask-restless-swagger'},
+    package_dir={'flask_restless_swagger': 'flask_restless_swagger'},
     include_package_data=True,
     install_requires=[
+        'Flask>=0.10.0',
+        'Flask-Restless>=0.17.0'
     ],
     license='BSD',
     zip_safe=False,
