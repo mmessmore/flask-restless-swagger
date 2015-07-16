@@ -24,7 +24,7 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 flask-restless-swagger test
+	flake8 flask_restless_swagger test
 
 test:
 	py.test
@@ -33,15 +33,15 @@ test-all:
 	tox
 
 coverage:
-	coverage run --source flask-restless-swagger setup.py test
+	coverage run --source flask_restless_swagger setup.py test
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
 
 docs:
-	rm -f docs/flask-restless-swagger.rst
+	rm -f docs/flask_restless_swagger.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ flask-restless-swagger
+	sphinx-apidoc -o docs/ flask_restless_swagger
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	open docs/_build/html/index.html

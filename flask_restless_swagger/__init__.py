@@ -1,6 +1,6 @@
 __author__ = 'Michael Messmore'
 __email__ = 'mike@messmore.org'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 import urlparse
 import json
