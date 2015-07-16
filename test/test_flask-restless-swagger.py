@@ -1,19 +1,8 @@
 """
 Tests for `flask-restless-swagger` module.
 """
-import pytest
-from flask-restless-swagger import flask-restless-swagger
 
+import flask_restless_swagger
 
-class TestFlask-restless-swagger(object):
-
-    @classmethod
-    def setup_class(cls):
-        pass
-
-    def test_something(self):
-        pass
-
-    @classmethod
-    def teardown_class(cls):
-        pass
+def test_import():
+    assert 'SwagAPIManager' in dir(flask_restless_swagger)

@@ -1,1 +1,3 @@
 wheel>=0.22
+Flask>=0.10.0
+Flask-Restless>=0.17.0
