@@ -9,13 +9,25 @@ from flask import jsonify, request, Blueprint, redirect
 from flask_restless import APIManager
 from flask_restless.helpers import *
 
-postgres_swagger = {
+sqlalchemy_swagger_type = {
     'INTEGER': 'integer',
+    'SMALLINT': 'int32',
+    'NUMERIC': 'number',
+    'DECIMAL': 'number',
     'VARCHAR': 'string',
     'TEXT': 'string',
     'DATE': 'date',
     'BOOLEAN': 'bool',
-    'BLOB': 'string'
+    'BLOB': 'binary',
+    'BYTEA': 'binary',
+    'BINARY': 'binary',
+    'VARBINARY': 'binary',
+    'FLOAT': 'float',
+    'REAL': 'float',
+    'DATETIME': 'date-time',
+    'BIGINT': 'int64',
+    'ENUM': 'string',
+    'INTERVAL': 'date-time',
 }
 
 
@@ -183,7 +195,7 @@ class SwagAPIManager(object):
                 column_type = str(column.type)
                 if '(' in column_type:
                     column_type = column_type.split('(')[0]
-                column_defn = postgres_swagger[column_type]
+                column_defn = sqlalchemy_swagger_type[column_type]
             except AttributeError:
                 schema = get_related_model(model, column_name)
                 if column_name + '_id' in columns:
