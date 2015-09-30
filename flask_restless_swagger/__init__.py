@@ -105,6 +105,9 @@ class SwagAPIManager(object):
 
                     }
                 }
+
+                if model.__doc__:
+                    self.swagger['paths'][path]['description'] = model.__doc__
                 if id_path not in self.swagger['paths']:
                     self.swagger['paths'][id_path] = {}
                 self.swagger['paths'][id_path][method] = {
@@ -126,6 +129,8 @@ class SwagAPIManager(object):
 
                     }
                 }
+                if model.__doc__:
+                    self.swagger['paths'][id_path]['description'] = model.__doc__
             elif method == 'delete':
                 if id_path not in self.swagger['paths']:
                     self.swagger['paths'][id_path] = {}
@@ -144,6 +149,8 @@ class SwagAPIManager(object):
 
                     }
                 }
+                if model.__doc__:
+                    self.swagger['paths'][id_path]['description'] = model.__doc__
             else:
                 self.swagger['paths'][path][method] = {
                     'parameters': [{
@@ -159,6 +166,8 @@ class SwagAPIManager(object):
 
                     }
                 }
+                if model.__doc__:
+                    self.swagger['paths'][path]['description'] = model.__doc__
 
     def add_defn(self, model, **kwargs):
         name = model.__name__
@@ -188,6 +197,9 @@ class SwagAPIManager(object):
                             '$ref': schema.__name__
                         }
                     }}
+
+            if column.__doc__:
+                column_defn['description'] = column.__doc__
             self.swagger['definitions'][name]['properties'][column_name] = column_defn
 
     def init_app(self, app, **kwargs):
