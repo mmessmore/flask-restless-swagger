@@ -11,6 +11,7 @@ flask-restless-swagger
 
 Magically create Swagger_ documentation as you magically create your RESTful API with Flask-Restless_
 
+This has lingered a while without the love it needs due to other more pressing projects.  Contributions are welcome and appreciated.
 
 Features
 --------
