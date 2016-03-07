@@ -2,7 +2,11 @@ __author__ = 'Michael Messmore'
 __email__ = 'mike@messmore.org'
 __version__ = '0.2.0'
 
-import urlparse
+try:
+	import urlparse
+except:
+	from urllib import parse as urlparse
+
 import json
 import yaml
 from flask import jsonify, request, Blueprint, redirect
@@ -188,7 +192,7 @@ class SwagAPIManager(object):
             'properties': {}
         }
         columns = get_columns(model).keys()
-        for column_name, column in get_columns(model).iteritems():
+        for column_name, column in get_columns(model).items():
             if column_name in kwargs.get('exclude_columns', []):
                 continue
             try:
