@@ -29,6 +29,7 @@ sqlalchemy_swagger_type = {
     'FLOAT': 'float',
     'REAL': 'float',
     'DATETIME': 'date-time',
+    'TIMESTAMP': 'date-time',
     'BIGINT': 'int64',
     'ENUM': 'string',
     'INTERVAL': 'date-time',
