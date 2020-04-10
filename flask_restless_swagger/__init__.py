@@ -94,7 +94,7 @@ class SwagAPIManager(object):
         self.swagger['info']['description'] = value
 
     def add_path(self, model, **kwargs):
-        name = model.__tablename__
+        name = kwargs.get("collection_name", model.__tablename__)
         schema = model.__name__
         path = kwargs.get('url_prefix', "") + '/' + name
         id_path = "{0}/{{{1}Id}}".format(path, schema.lower())
